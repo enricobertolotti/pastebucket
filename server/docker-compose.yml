@@ -7,6 +7,7 @@ services:
             - MONGO_INITDB_DATABASE=pastebucket
         volumes:
             - mongo-data:/data/db
+            - ./mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
         network_mode: "host"
     api:
         build: ./api/
