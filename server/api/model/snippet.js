@@ -1,6 +1,8 @@
+import { MapStore } from "./../lib/mapstore.js";
 import { v4 as uuid } from "uuid";
 
 const SNIPPETS = new Map();
+const store = new MapStore("snippets.json");
 
 // Snippet {
 //   id: String,
@@ -8,29 +10,41 @@ const SNIPPETS = new Map();
 //   added: Date
 // }
 
+store.read().then(snippets => {
+  for (let [id, snippet] of snippets) {
+    SNIPPETS.set(id, snippet);
+  }
+});
+
 export function getSnippets() {
   return Array.from(SNIPPETS.values());
 }
 
-export function createSnippet(body) {
+export async function createSnippet(body) {
   const id = uuid();
   const added = Date.now();
   console.log("Body: ", body);
   const snippet = { id, added, body };
   SNIPPETS.set(id, snippet);
+
+  await store.save(SNIPPETS);
+
   return { ...snippet };
 }
 
-export function updateSnippet(id, body) {
+export async function updateSnippet(id, body) {
   if (!SNIPPETS.has(id)) {
     return null;
   }
   const snippet = SNIPPETS.get(id);
   snippet.body = body ?? snippet.body;
+
+  await store.save(SNIPPETS);
+
   return { ...snippet };
 }
 
-export function getSnippet(id) {
+export async function getSnippet(id) {
   if (!SNIPPETS.has(id)) {
     return null;
   }
@@ -38,10 +52,16 @@ export function getSnippet(id) {
   return { ...snippet };
 }
 
-export function deleteSnippet(id) {
-  return SNIPPETS.delete(id);
+export async function deleteSnippet(id) {
+  const success = SNIPPETS.delete(id);
+
+  await store.save(SNIPPETS);
+
+  return success;
 }
 
-export function deleteAll() {
+export async function deleteAll() {
   SNIPPETS = new Map();
+  await store.save(SNIPPETS);
+  res.status(200).send("Deleted all snippets");
 }
