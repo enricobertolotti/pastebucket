@@ -1,17 +1,24 @@
-"use strict";
+// Import libraries
+import express from "express";
+import morgan from "morgan";
 
-const express = require("express");
-const mongoose = require("mongoose");
+// Import environment configuration file
+import dotenv from "dotenv";
+dotenv.config();
 
-// Constants
-const PORT = 8080;
-const HOST = "0.0.0.0";
-
-// App
+// Initialize the express app
 const app = express();
-app.get("/", (req, res) => {
-  res.send("Hello World, im your local pastebucket");
-});
 
-app.listen(PORT, HOST);
-console.log(`Running on http://${HOST}:${PORT}`);
+// Import routes
+app.use(express.urlencoded({ extended: true }));
+import routes from "./routes/index.js";
+
+// Use logging
+app.use(morgan("dev"));
+
+// Use routes
+app.use(routes);
+
+app.listen(process.env.API_PORT, function () {
+  console.log("App listening on port 3000");
+});
